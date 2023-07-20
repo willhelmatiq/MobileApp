@@ -13,6 +13,8 @@
     <string name="download_description">Download</string>
     <string name="favorite_description">Add to favorite</string>
     <string name="bookmark_description">Add to bookmarks</string>
+    <string name="avatar_description">The Guy from Disturbed</string>
+
 
     <!-- Image Details -->
     <string name="details_camera_title">Camera</string>
