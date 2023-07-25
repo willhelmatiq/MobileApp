@@ -2,6 +2,7 @@ package com.harbourspace.myapplication.ui.api
 
 import com.harbourspace.myapplication.ui.data.UnsplashCollection
 import com.harbourspace.myapplication.ui.data.UnsplashItem
+import com.harbourspace.myapplication.ui.data.UnsplashPhotoInfo
 import com.harbourspace.myapplication.ui.data.UnsplashSearch
 import com.harbourspace.myapplication.ui.data.cb.UnsplashResult
 import okhttp3.OkHttpClient
@@ -26,6 +27,7 @@ class UnsplashApiProvider {
 
         Retrofit.Builder()
             .baseUrl(BASE_URL)
+            .client(client)
             .addConverterFactory(MoshiConverterFactory.create())
             .build()
             .create<UnsplashApi>()
@@ -78,6 +80,22 @@ class UnsplashApiProvider {
             }
 
             override fun onFailure(call: Call<List<UnsplashCollection>>, t: Throwable) {
+                cb.onDataFetchedFailed()
+            }
+        })
+    }
+
+    fun fetchPhotoDetail(id: String, cb: UnsplashResult) {
+        retrofit.fetchPhotoDetail(id).enqueue(object : Callback<UnsplashPhotoInfo> {
+            override fun onResponse(call: Call<UnsplashPhotoInfo>, response: Response<UnsplashPhotoInfo>) {
+                if (response.isSuccessful && response.body() != null) {
+                    cb.onDataDetailsFetchedSuccess(response.body()!!)
+                } else {
+                    cb.onDataFetchedFailed()
+                }
+            }
+
+            override fun onFailure(call: Call<UnsplashPhotoInfo>, t: Throwable) {
                 cb.onDataFetchedFailed()
             }
         })

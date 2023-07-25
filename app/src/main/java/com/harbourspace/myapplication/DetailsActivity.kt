@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,34 +27,51 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import com.harbourspace.myapplication.ui.data.UnsplashItem
 
 private const val TAG = "DetailsActivity"
 
 class DetailsActivity : ComponentActivity() {
 
+    private val unsplashViewModel: UnsplashViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val image = intent.extras!!.get(EXTRA_IMAGE) as UnsplashItem
+
+        unsplashViewModel.fetchPhotoDetails(image.id)
         setContent {
+
+            val photoDetails = unsplashViewModel.photoDetails.observeAsState()
 
             LazyColumn {
                 item {
                     Surface {
+                        val painter = rememberAsyncImagePainter(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(image.urls?.regular)
+                                .build()
+                        )
+
                         Image(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(250.dp),
-                            painter = painterResource(id = R.drawable.bcn_la_sagrada_familia),
+                            painter = painter,
                             contentScale = ContentScale.Crop,
                             contentDescription = stringResource(id = R.string.description_image_preview)
                         )
@@ -73,7 +91,7 @@ class DetailsActivity : ComponentActivity() {
                                     tint = Color.White
                                 )
                                 Text(
-                                    text = stringResource(id = R.string.map_location),
+                                    text = (photoDetails.value?.location?.country ?: "-") + ", " + (photoDetails.value?.location?.city ?: "-"),
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Normal,
                                     color = Color.White
@@ -149,7 +167,7 @@ class DetailsActivity : ComponentActivity() {
                         ) {
                             AddImageInformation(
                                 title = stringResource(id = R.string.details_camera_title),
-                                subtitle = stringResource(id = R.string.details_camera_default)
+                                subtitle = photoDetails.value?.exif?.name ?: "-"
                             )
                         }
 
@@ -158,7 +176,7 @@ class DetailsActivity : ComponentActivity() {
                         ) {
                             AddImageInformation(
                                 title = stringResource(id = R.string.details_aperture_title),
-                                subtitle = stringResource(id = R.string.details_aperture_default)
+                                subtitle = photoDetails.value?.exif?.aperture ?: "-"
                             )
                         }
                     }
@@ -173,7 +191,7 @@ class DetailsActivity : ComponentActivity() {
                         ) {
                             AddImageInformation(
                                 title = stringResource(id = R.string.details_focal_title),
-                                subtitle = stringResource(id = R.string.details_focal_default)
+                                subtitle = photoDetails.value?.exif?.focal_length ?: "-"
                             )
                         }
 
@@ -182,7 +200,7 @@ class DetailsActivity : ComponentActivity() {
                         ) {
                             AddImageInformation(
                                 title = stringResource(id = R.string.details_shutter_title),
-                                subtitle = stringResource(id = R.string.details_shutter_default)
+                                subtitle = photoDetails.value?.exif?.exposure_time ?: "-"
                             )
                         }
                     }
@@ -197,7 +215,7 @@ class DetailsActivity : ComponentActivity() {
                         ) {
                             AddImageInformation(
                                 title = stringResource(id = R.string.details_iso_title),
-                                subtitle = stringResource(id = R.string.details_iso_default)
+                                subtitle = (photoDetails.value?.exif?.iso?: "-").toString()
                             )
                         }
 
@@ -206,7 +224,7 @@ class DetailsActivity : ComponentActivity() {
                         ) {
                             AddImageInformation(
                                 title = stringResource(id = R.string.details_dimensions_title),
-                                subtitle = stringResource(id = R.string.details_dimensions_default)
+                                subtitle = "???"
                             )
                         }
                     }
@@ -234,7 +252,7 @@ class DetailsActivity : ComponentActivity() {
                             ) {
                                 AddImageInformation(
                                     title = stringResource(id = R.string.details_views_title),
-                                    subtitle = stringResource(id = R.string.details_views_default)
+                                    subtitle = "???"
                                 )
                             }
 
@@ -243,7 +261,7 @@ class DetailsActivity : ComponentActivity() {
                             ) {
                                 AddImageInformation(
                                     title = stringResource(id = R.string.details_downloads_title),
-                                    subtitle = stringResource(id = R.string.details_downloads_default)
+                                    subtitle = (photoDetails.value?.downloads ?: "-").toString()
                                 )
                             }
 
@@ -252,7 +270,7 @@ class DetailsActivity : ComponentActivity() {
                             ) {
                                 AddImageInformation(
                                     title = stringResource(id = R.string.details_likes_title),
-                                    subtitle = stringResource(id = R.string.details_likes_default)
+                                    subtitle = (photoDetails.value?.likes ?: "-").toString()
                                 )
                             }
                         }

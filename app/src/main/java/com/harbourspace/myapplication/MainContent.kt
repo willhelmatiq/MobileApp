@@ -149,7 +149,7 @@ fun MainContent(
 
                     val painter = rememberAsyncImagePainter(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(image.urls.regular)
+                            .data(image.urls?.regular)
                             .build()
                     )
 
@@ -214,7 +214,7 @@ fun MainContent(
                             .padding(16.dp),
                         verticalArrangement = Arrangement.Bottom
                     ) {
-                        Text(image.user.name)
+                        image.user?.let { Text(it.name) }
 
                         Spacer(modifier = Modifier.height(8.dp))
 
