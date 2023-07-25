@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+
+    id("kotlin-parcelize")
 }
 
 android {
@@ -51,6 +53,20 @@ dependencies {
     // Retrofit libraries
     implementation "com.squareup.retrofit2:converter-moshi:2.9.0"
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+
+    // Accompanist
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.31.5-beta")
+
+
+    // Coil libraries
+    implementation("io.coil-kt:coil:2.4.0")
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
+    // Lottie
+    implementation("com.airbnb.android:lottie-compose:6.1.0")
+
+    implementation("androidx.compose.material:material:1.4.3")
+    implementation("androidx.navigation:navigation-compose:2.6.0")
 
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.recyclerview:recyclerview:")

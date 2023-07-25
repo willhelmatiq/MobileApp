@@ -1,6 +1,8 @@
 package com.harbourspace.myapplication.ui.api
 
+import com.harbourspace.myapplication.ui.data.UnsplashCollection
 import com.harbourspace.myapplication.ui.data.UnsplashItem
+import com.harbourspace.myapplication.ui.data.UnsplashSearch
 import com.harbourspace.myapplication.ui.data.cb.UnsplashResult
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -44,6 +46,38 @@ class UnsplashApiProvider {
             }
 
             override fun onFailure(call: Call<List<UnsplashItem>>, t: Throwable) {
+                cb.onDataFetchedFailed()
+            }
+        })
+    }
+
+    fun searchImages(keyword: String, cb: UnsplashResult) {
+        retrofit.searchPhotos(keyword).enqueue(object : Callback<UnsplashSearch> {
+            override fun onResponse(call: Call<UnsplashSearch>, response: Response<UnsplashSearch>) {
+                if (response.isSuccessful && response.body() != null) {
+                    cb.onDataFetchedSuccess(response.body()!!.results)
+                } else {
+                    cb.onDataFetchedFailed()
+                }
+            }
+
+            override fun onFailure(call: Call<UnsplashSearch>, t: Throwable) {
+                cb.onDataFetchedFailed()
+            }
+        })
+    }
+
+    fun fetchCollections(cb: UnsplashResult) {
+        retrofit.fetchCollections().enqueue(object : Callback<List<UnsplashCollection>> {
+            override fun onResponse(call: Call<List<UnsplashCollection>>, response: Response<List<UnsplashCollection>>) {
+                if (response.isSuccessful && response.body() != null) {
+                    cb.onCollectionsFetchedSuccess(response.body()!!)
+                } else {
+                    cb.onDataFetchedFailed()
+                }
+            }
+
+            override fun onFailure(call: Call<List<UnsplashCollection>>, t: Throwable) {
                 cb.onDataFetchedFailed()
             }
         })

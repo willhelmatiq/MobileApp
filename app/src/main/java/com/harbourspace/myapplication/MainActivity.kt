@@ -5,36 +5,36 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.annotation.DrawableRes
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.harbourspace.myapplication.ui.data.UnsplashItem
 import com.harbourspace.myapplication.ui.exercises.ExerciseActivity
-import com.harbourspace.myapplication.ui.theme.Purple80
 import com.harbourspace.myapplication.ui.theme.UnsplashTheme
+import com.harbourspace.unsplash.ui.navigation.BottomNavigationScreen
 
-private const val TAG = "MainActivity"
+enum class Tab(@StringRes val tab: Int) {
+    HOME(R.string.main_tab_images),
+    COLLECTIONS(R.string.main_tab_collections)
+}
 
 class MainActivity : ComponentActivity() {
 
@@ -44,12 +44,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        unsplashViewModel.fetchImages()
+        unsplashViewModel.fetchCollections()
+
         setContent {
 
             UnsplashTheme {
 
-                val items = unsplashViewModel.items.observeAsState()
-                unsplashViewModel.fetchImages()
+                val navController = rememberNavController()
 
                 Scaffold(
                     topBar = {
@@ -72,41 +74,52 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                             })
+                    },
+                    bottomBar = {
+                        val items = listOf(
+                            BottomNavigationScreen.Home,
+                            BottomNavigationScreen.About
+                        )
+
+                        val selected = remember { mutableStateOf(0) }
+
+                        NavigationBar {
+                            items.forEachIndexed { index, screen ->
+                                NavigationBarItem(
+                                    selected = selected.value == index,
+                                    onClick = {
+                                        selected.value = index
+                                        navController.navigate(screen.route)
+                                    },
+                                    icon = {
+                                        Icon(
+                                            painter = painterResource(id = screen.drawResId),
+                                            contentDescription = stringResource(id = screen.stringResId),
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    },
+                                    label = {
+                                        Text(
+                                            stringResource(id = screen.stringResId)
+                                        )
+                                    })
+                            }
+                        }
                     }
                 ) {
-                    LazyColumn(
+                    Column(
                         modifier = Modifier.padding(it)
                     ) {
-                        items(items.value ?: emptyList()) { image ->
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(250.dp)
-                                    .padding(8.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .clickable { openDetailsActivity(R.drawable.bcn_la_sagrada_familia) },
-                                color = Purple80
-                            ) {
+                        NavHost(navController, startDestination = BottomNavigationScreen.Home.route) {
+                            composable(BottomNavigationScreen.Home.route) {
+                                MainScreen(
+                                    unsplashViewModel = unsplashViewModel,
+                                    openDetailsActivity = { openDetailsActivity(it) }
+                                )
+                            }
 
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(250.dp)
-                                        .padding(16.dp),
-                                    verticalArrangement = Arrangement.Bottom
-                                ) {
-                                    Text(image.user.name)
-
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    image.description?.let { description ->
-                                        Text(
-                                            text = description,
-                                            maxLines = 2,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-                                }
+                            composable(BottomNavigationScreen.About.route) {
+                                AboutContent()
                             }
                         }
                     }
@@ -115,9 +128,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun openDetailsActivity(@DrawableRes resId: Int) {
+    private fun openDetailsActivity(item: UnsplashItem) {
         val intent = Intent(this, DetailsActivity::class.java)
-        intent.putExtra(EXTRA_IMAGE, resId)
+        intent.putExtra(EXTRA_IMAGE, item)
         startActivity(intent)
     }
 }

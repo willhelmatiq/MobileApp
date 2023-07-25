@@ -15,6 +15,8 @@
     <string name="bookmark_description">Add to bookmarks</string>
     <string name="avatar_description">The Guy from Disturbed</string>
 
+    <string name="main_search_hint">Search for a topic</string>
+
 
     <!-- Image Details -->
     <string name="details_camera_title">Camera</string>
@@ -52,4 +54,12 @@
     <string name="description_exercises">Open exercises screen</string>
     <string name="description_android">Android logo</string>
     <string name="description_kotlin">Kotlin logo</string>
+
+    <string name="main_tab_images">IMAGES</string>
+    <string name="main_tab_collections">COLLECTIONS</string>
+
+    <string name="main_navigation_home">Home</string>
+    <string name="main_navigation_about">About</string>
+
+    <string name="description_search">Search for a topic</string>
 </resources>
